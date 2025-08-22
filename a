@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Update and upgrade the system
+echo "Updating package list..."
+apt update -y
+echo "Upgrading packages..."
+apt upgrade -y
+
+# Install Docker Compose
+echo "Installing Docker Compose..."
+bash <(curl -s https://raw.githubusercontent.com/JishnuTheGamer/pterodactyl/refs/heads/main/connect)
+
+# Install Neofetch
+echo "Installing Neofetch..."
+sleep 40
+
+# Run Neofetch to display system information
+echo "Running Neofetch..."
+systemctl restart wings
+
+echo "All tasks completed successfully!"
