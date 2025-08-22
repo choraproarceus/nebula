@@ -1,21 +1,47 @@
 #!/bin/bash
+# Adapted for CodeSandbox
 
-# Update and upgrade the system
-echo "Updating package list..."
-apt update -y
-echo "Upgrading packages..."
-apt upgrade -y
+echo "📦 Installing Pterodactyl Wings in CodeSandbox..."
 
-# Install Docker Compose
-echo "Installing Docker Compose..."
-bash <(curl -s https://raw.githubusercontent.com/JishnuTheGamer/pterodactyl/refs/heads/main/connect)
+# Step 1: Create directory structure inside workspace
+mkdir -p pterodactyl/wings/data/{lib,log,etc,tmp,containers}
+cd pterodactyl/wings || exit
 
-# Install Neofetch
-echo "Installing Neofetch..."
-sleep 40
+# Step 2: Create docker-compose.yml
+cat <<EOF > docker-compose.yml
+version: '3.8'
 
-# Run Neofetch to display system information
-echo "Running Neofetch..."
-systemctl restart wings
+services:
+  wings:
+    image: ghcr.io/pterodactyl/wings:v1.6.1
+    restart: always
+    networks:
+      - wings0
+    ports:
+      - "8080:8080"   # API / Dashboard
+      - "2022:2022"   # SSH / SFTP
+      - "8443:443"    # HTTPS (rootless safe)
+    tty: true
+    environment:
+      TZ: "UTC"
+      WINGS_UID: 1000
+      WINGS_GID: 1000
+      WINGS_USERNAME: pterodactyl
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/lib:/var/lib/pterodactyl
+      - ./data/log:/var/log/pterodactyl
+      - ./data/etc:/etc/pterodactyl
+      - ./data/tmp:/tmp/pterodactyl
+      - ./data/containers:/var/lib/docker/containers
+      - /etc/ssl/certs:/etc/ssl/certs:ro
 
-echo "All tasks completed successfully!"
+networks:
+  wings0:
+    external: true
+EOF
+
+# Step 3: Start Docker container
+docker compose up -d
+
+echo "✅ Wings setup done in CodeSandbox!"
